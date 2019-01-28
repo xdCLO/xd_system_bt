@@ -92,7 +92,7 @@ interface IBluetooth
     int getDiscoverableTimeout();
     boolean setDiscoverableTimeout(int timeout);
 
-    boolean startDiscovery();
+    boolean startDiscovery(String callingPackage);
     boolean cancelDiscovery();
     boolean isDiscovering();
     long getDiscoveryEndMillis();
@@ -166,6 +166,7 @@ interface IBluetooth
     oneway void requestActivityInfo(in ResultReceiver result);
 
     void onLeServiceUp();
+    void updateQuietModeStatus(boolean quietMode);
     void onBrEdrDown();
     int setSocketOpt(int type, int port, int optionName, in byte [] optionVal, int optionLen);
     int getSocketOpt(int type, int port, int optionName, out byte [] optionVal);
