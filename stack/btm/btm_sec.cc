@@ -3826,22 +3826,6 @@ void btm_sec_encrypt_change(uint16_t handle, uint8_t status,
           SMP_BR_PairWith(p_dev_rec->bd_addr);
         }
       }
-    } else {
-      // BR/EDR is successfully encrypted. Correct LK type if needed
-      // (BR/EDR LK derived from LE LTK was used for encryption)
-      if ((encr_enable == 1) && /* encryption is ON for SSP */
-          /* LK type is for BR/EDR SC */
-          (p_dev_rec->link_key_type == BTM_LKEY_TYPE_UNAUTH_COMB_P_256 ||
-           p_dev_rec->link_key_type == BTM_LKEY_TYPE_AUTH_COMB_P_256)) {
-        if (p_dev_rec->link_key_type == BTM_LKEY_TYPE_UNAUTH_COMB_P_256)
-          p_dev_rec->link_key_type = BTM_LKEY_TYPE_UNAUTH_COMB;
-        else /* BTM_LKEY_TYPE_AUTH_COMB_P_256 */
-          p_dev_rec->link_key_type = BTM_LKEY_TYPE_AUTH_COMB;
-
-        BTM_TRACE_DEBUG("updated link key type to %d",
-                        p_dev_rec->link_key_type);
-        btm_send_link_key_notif(p_dev_rec);
-      }
     }
   }
 
@@ -3913,7 +3897,6 @@ static void btm_sec_connect_after_reject_timeout(UNUSED_ATTR void* data) {
  ******************************************************************************/
 void btm_sec_connected(const RawAddress& bda, uint16_t handle, uint8_t status,
                        uint8_t enc_mode) {
-  tBTM_SEC_DEV_REC* p_dev_rec = btm_find_dev(bda);
   uint8_t res;
   bool is_pairing_device = false;
   bool addr_matched;
@@ -3922,6 +3905,7 @@ void btm_sec_connected(const RawAddress& bda, uint16_t handle, uint8_t status,
 
   btm_acl_resubmit_page();
 
+  tBTM_SEC_DEV_REC* p_dev_rec = btm_find_dev(bda);
   if (p_dev_rec) {
     VLOG(2) << __func__ << ": Security Manager: in state: "
             << btm_pair_state_descr(btm_cb.pairing_state)
@@ -4258,7 +4242,6 @@ tBTM_STATUS btm_sec_disconnect(uint16_t handle, uint8_t reason) {
  *
  ******************************************************************************/
 void btm_sec_disconnected(uint16_t handle, uint8_t reason) {
-  tBTM_SEC_DEV_REC* p_dev_rec = btm_find_dev_by_handle(handle);
   uint8_t old_pairing_flags = btm_cb.pairing_flags;
   int result = HCI_ERR_AUTH_FAILURE;
   tBTM_SEC_CALLBACK* p_callback = NULL;
@@ -4269,6 +4252,7 @@ void btm_sec_disconnected(uint16_t handle, uint8_t reason) {
 
   btm_acl_resubmit_page();
 
+  tBTM_SEC_DEV_REC* p_dev_rec = btm_find_dev_by_handle(handle);
   if (!p_dev_rec) return;
 
   transport =
